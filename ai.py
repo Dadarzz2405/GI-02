@@ -1,14 +1,15 @@
 from groq import Groq
 from dotenv import load_dotenv
 import os
+
 load_dotenv()
 
-# Load API key from environment (or .env). Use the literal name 'API_KEY'.
-GROQ_API_KEY = os.getenv('API_KEY')
+GROQ_API_KEY = os.getenv("API_KEY")
 
-client = None
-if GROQ_API_KEY:
-    client = Groq(api_key=GROQ_API_KEY)
+if not GROQ_API_KEY:
+    raise RuntimeError("API_KEY not found. Check your .env file.")
+
+client = Groq(api_key=GROQ_API_KEY)
 
 SYSTEM_PROMPT = """
 You are an Islamic educational assistant for a school Rohis organization.
@@ -17,12 +18,13 @@ Do not issue fatwas or definitive rulings.
 If a question requires a scholar, advise consulting a trusted ustadz.
 Give concise short answers focused on Islamic teachings and values.
 Avoid using table format in your responses.
+Avoid using '**' for bold text in your responses.
+If you don't know the answer, say "I'm sorry, I don't have that information."
+Do not reference yourself as an AI model.
+Keep answers under 200 words.
 """
 
 def call_chatbot_groq(message: str) -> str:
-    if not client:
-        return "AI chatbot is not configured. Please set the API_KEY environment variable."
-    
     completion = client.chat.completions.create(
         model="openai/gpt-oss-120b",
         messages=[
@@ -30,7 +32,7 @@ def call_chatbot_groq(message: str) -> str:
             {"role": "user", "content": message}
         ],
         temperature=0.4,
-        max_tokens=200
+        max_tokens=200,
     )
 
     return completion.choices[0].message.content
