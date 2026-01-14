@@ -148,18 +148,6 @@ def attendance():
     members = User.query.filter_by(division_id=current_user.division_id).all()
     return render_template('attendance.html', members=members, records=attendance_records)
 
-@app.route('/divisions/delete/<int:div_id>', methods=['POST'])
-@login_required
-def delete_division(div_id):
-    if current_user.role not in ['admin', 'ketua', 'pembina']:
-        abort(403)
-    
-    division = Division.query.get_or_404(div_id)
-    db.session.delete(division)
-    db.session.commit()
-    flash(f"Division '{division.name}' deleted!", "success")
-    return redirect(url_for('manage_division'))
-
 @app.route('/divisions', methods=['GET', 'POST'])
 @login_required
 def manage_divisions():
@@ -177,10 +165,22 @@ def manage_divisions():
                 db.session.add(new_div)
                 db.session.commit()
                 flash(f"Division '{name}' created!", "success")
-        return redirect(url_for('manage_division'))
+        return redirect(url_for('manage_divisions'))
     
     divisions = Division.query.all()
     return render_template('manage_division.html', divisions=divisions)
+
+@app.route('/divisions/delete/<int:div_id>', methods=['POST'])
+@login_required
+def delete_division(div_id):
+    if current_user.role not in ['admin', 'ketua', 'pembina']:
+        abort(403)
+    
+    division = Division.query.get_or_404(div_id)
+    db.session.delete(division)
+    db.session.commit()
+    flash(f"Division '{division.name}' deleted!", "success")
+    return redirect(url_for('manage_divisions'))
 
 @app.route('/attendance-mark', methods=['GET', 'POST'])
 @login_required
