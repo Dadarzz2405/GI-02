@@ -31,6 +31,14 @@ migrate = Migrate(app, db)
 def load_user(user_id):
     return User.query.get(int(user_id))
 
+def can_mark_attendance(user, target_division_id):
+    if user.role == "admin":
+        return True
+    if user.can_mark_attendance and user.division_id == target_division_id:
+        return True
+    
+    return False
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -119,67 +127,125 @@ def create_session():
         return redirect(url_for('dashboard_admin'))
     return render_template('create_session.html')
 
+from datetime import date
+
 @app.route('/attendance', methods=['GET', 'POST'])
 @login_required
 def attendance():
-    if not current_user.can_mark_attendance:
+    if not current_user.can_mark_attendance and current_user.role != 'admin':
         abort(403)
-    attendance_records = Attendance.query.filter_by(
-        division_id=current_user.division_id
-    ).all()
+    # load members for the current user's division
+    members = User.query.filter_by(division_id=current_user.division_id).all()
 
+    # load available sessions and determine selected session
+    sessions = Session.query.order_by(Session.date.desc()).all()
+    selected_session_id = None
     if request.method == 'POST':
-        members = User.query.filter_by(division_id=current_user.division_id).all()
+        # session id should come from the form
+        session_id_raw = request.form.get('session_id')
+        try:
+            selected_session_id = int(session_id_raw) if session_id_raw else None
+        except (ValueError, TypeError):
+            selected_session_id = None
+
+        if not selected_session_id:
+            flash('Please select a valid session.', 'error')
+            return redirect(url_for('attendance'))
+
         for member in members:
-            present = f"present_{member.id}" in request.form
+            status = request.form.get(f"status_{member.id}")
+
+            if not status:
+                continue
 
             record = Attendance.query.filter_by(
-                member_id=member.id,
-                date=date.today()
+                session_id=selected_session_id,
+                user_id=member.id
             ).first()
-            if not record:
-                record = Attendance(member_id=member.id, division_id=member.division_id, date=datetime.date.today())
-            record.present = present
-            db.session.add(record)
-        db.session.commit()
-        flash("Attendance submitted", "success")
-        return redirect(url_for('attendance'))
 
-    members = User.query.filter_by(division_id=current_user.division_id).all()
-    return render_template('attendance.html', members=members, records=attendance_records)
+            if not record:
+                record = Attendance(
+                    session_id=selected_session_id,
+                    user_id=member.id,
+                    status=status
+                )
+                db.session.add(record)
+            else:
+                record.status = status
+
+        db.session.commit()
+        flash("Attendance saved successfully", "success")
+        return redirect(url_for('attendance', session_id=selected_session_id))
+
+    # GET: determine which session to show (query param or latest)
+    if request.args.get('session_id'):
+        try:
+            selected_session_id = int(request.args.get('session_id'))
+        except (ValueError, TypeError):
+            selected_session_id = None
+
+    if not selected_session_id and sessions:
+        try:
+            selected_session_id = sessions[0].id
+        except Exception:
+            selected_session_id = None
+
+    # load attendance records for the selected session
+    records = []
+    if selected_session_id:
+        records = Attendance.query.filter_by(session_id=selected_session_id).all()
+
+    return render_template(
+        'attendance.html',
+        members=members,
+        sessions=sessions,
+        records=records,
+        selected_session_id=selected_session_id
+    )
 
 @app.route('/divisions', methods=['GET', 'POST'])
 @login_required
 def manage_divisions():
     if current_user.role not in ['admin', 'ketua', 'pembina']:
         abort(403)
-    
+
     if request.method == 'POST':
-        name = request.form.get('name')
-        if name:
-            existing = Division.query.filter_by(name=name).first()
-            if existing:
-                flash("Division already exists!", "error")
-            else:
-                new_div = Division(name=name)
-                db.session.add(new_div)
-                db.session.commit()
-                flash(f"Division '{name}' created!", "success")
+        name = request.form.get('name', '').strip()
+        if not name:
+            flash("Division name cannot be empty", "error")
+            return redirect(url_for('manage_divisions'))
+
+        existing = Division.query.filter_by(name=name).first()
+        if existing:
+            flash("Division already exists!", "error")
+        else:
+            new_div = Division(name=name)
+            db.session.add(new_div)
+            db.session.commit()
+            flash(f"Division '{name}' created!", "success")
+
         return redirect(url_for('manage_divisions'))
-    
+
     divisions = Division.query.all()
     return render_template('manage_division.html', divisions=divisions)
 
-@app.route('/divisions/delete/<int:div_id>', methods=['POST'])
+
+@app.route('/division/delete/<int:id>', methods=['POST'])
 @login_required
-def delete_division(div_id):
-    if current_user.role not in ['admin', 'ketua', 'pembina']:
+def delete_division(id):
+    if current_user.role != 'admin':
         abort(403)
-    
-    division = Division.query.get_or_404(div_id)
+
+    division = Division.query.get_or_404(id)
+
+    for user in division.members:
+        user.division_id = None
+        user.can_mark_attendance = False  # 🔥 IMPORTANT
+
     db.session.delete(division)
     db.session.commit()
-    flash(f"Division '{division.name}' deleted!", "success")
+
+    flash("Division deleted and permissions revoked", "success")
     return redirect(url_for('manage_divisions'))
 
 @app.route('/attendance-mark', methods=['GET', 'POST'])
@@ -463,25 +529,32 @@ def division_management():
     if request.method == 'POST':
         user_ids = request.form.getlist('user_ids')
         division_id = request.form.get('division_id')
-        can_mark = request.form.get('can_mark_attendance')
+        marker_id = request.form.get('marker_id')
 
         if not user_ids or not division_id:
             flash("Please select users and a division.", "danger")
             return redirect(url_for('division_management'))
 
-        user_ids = [int(uid) for uid in user_ids]
+        try:
+            user_ids = [int(uid) for uid in user_ids]
+            division_id = int(division_id)
+        except (ValueError, TypeError):
+            flash("Invalid input values.", "danger")
+            return redirect(url_for('division_management'))
 
-        if can_mark:
-            User.query.filter_by(
-                division_id=division_id,
-                can_mark_attendance=True
-            ).update({"can_mark_attendance": False})
+        try:
+            marker_id = int(marker_id) if marker_id else None
+        except (ValueError, TypeError):
+            marker_id = None
 
-        for i, uid in enumerate(user_ids):
+        # Ensure only one user in this division has marking permission
+        User.query.filter_by(division_id=division_id, can_mark_attendance=True).update({"can_mark_attendance": False})
+
+        for uid in user_ids:
             user = User.query.get(uid)
             if user:
                 user.division_id = division_id
-                user.can_mark_attendance = True if (can_mark and i == 0) else False
+                user.can_mark_attendance = True if (marker_id and uid == marker_id) else False
                 db.session.add(user)
 
         db.session.commit()

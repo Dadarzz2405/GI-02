@@ -4,6 +4,17 @@
 <h2>Attendance - {{ current_user.division.name if current_user.division else "No Division" }}</h2>
 
 <form method="POST">
+    <label for="session_id">Session:</label>
+    <select name="session_id" id="session_id">
+        {% if sessions %}
+            {% for s in sessions %}
+                <option value="{{ s.id }}" {% if selected_session_id and s.id == selected_session_id %} selected {% endif %}>{{ s.name }} - {{ s.date }}</option>
+            {% endfor %}
+        {% else %}
+            <option value="">No sessions available</option>
+        {% endif %}
+    </select>
+    <br><br>
     <table border="1" cellpadding="5">
         <thead>
             <tr>
@@ -17,7 +28,7 @@
             {% for member in members %}
             {% set record = None %}
             {% for r in records %}
-                {% if r.member_id == member.id %}
+                {% if r.user_id == member.id %}
                     {% set record = r %}
                 {% endif %}
             {% endfor %}

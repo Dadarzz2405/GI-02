@@ -4,47 +4,50 @@
 
 {% block content %}
 <div class="mt-4">
-    <h2>Division Management</h2>
+    <h2>Assign Attendance Permission</h2>
 
-    <form method="POST" class="mb-4">
-        <label>Users (hold Ctrl/Cmd to select multiple)</label><br>
-        <select name="user_ids" multiple required class="form-select">
-            {% for u in users %}
-                <option value="{{ u.id }}">{{ u.name }} ({{ u.role }})</option>
-            {% endfor %}
-        </select>
+    <form method="POST">
+        <div class="mb-3">
+            <label class="form-label">Select Division</label>
+            <select name="division_id" class="form-select" required>
+                {% for d in divisions %}
+                    <option value="{{ d.id }}">{{ d.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <br><br>
+        <div class="mb-3">
+            <label class="form-label">Select Members (hold Ctrl / Cmd to select multiple)</label>
+            <select name="user_ids" class="form-select" multiple size="8" required>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.name }} — {{ user.division.name if user.division else 'No Division' }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <label>Division</label><br>
-        <select name="division_id" required class="form-select">
-            {% for div in divisions %}
-                <option value="{{ div.id }}">{{ div.name }}</option>
-            {% endfor %}
-        </select>
+        <div class="mb-3">
+            <label class="form-label">Choose one member to be able to mark attendance (optional)</label>
+            <select name="marker_id" class="form-select">
+                <option value="">-- No marker --</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}">{{ user.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
 
-        <br><br>
-
-        <label>
-            <input type="checkbox" name="can_mark_attendance">
-            Only one selected user will have permission to mark attendance
-        </label>
-
-        <br><br>
-
-        <button type="submit" class="btn btn-primary">Assign</button>
+        <button class="btn btn-primary" type="submit">Save</button>
     </form>
 
     <hr>
 
-    <h4>Current Users</h4>
+    <h4>Current Permissions</h4>
     <table class="table table-striped">
         <thead>
             <tr>
                 <th>Name</th>
                 <th>Role</th>
                 <th>Division</th>
-                <th>Can Mark Attendance</th>
+                <th>Permission</th>
             </tr>
         </thead>
         <tbody>
