@@ -50,7 +50,7 @@ def call_chatbot_groq(message: str) -> dict:
         client = get_groq_client()
 
         completion = client.chat.completions.create(
-            model="openai/gpt-oss-70b",  # lower latency, enough for this task
+            model="openai/gpt-oss-120b",  # lower latency, enough for this task
             messages=[
                 {"role": "system", "content": SYSTEM_PROMPT.strip()},
                 {"role": "user", "content": message.strip()}
@@ -61,7 +61,6 @@ def call_chatbot_groq(message: str) -> dict:
 
         content = completion.choices[0].message.content.strip()
 
-        # --- Navigation handling ---
         match = NAV_REGEX.match(content)
         if match:
             page = match.group(1).lower()
