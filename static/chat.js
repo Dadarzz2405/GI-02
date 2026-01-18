@@ -1,80 +1,98 @@
-const chatToggle = document.getElementById("chat-toggle");
-const chatBox = document.getElementById("chat-box");
-const chatClose = document.getElementById("chat-close");
-const sendBtn = document.getElementById("send-btn");
-const input = document.getElementById("user-input");
-const messages = document.getElementById("chat-messages");
+document.addEventListener("DOMContentLoaded", () => {
+  const chatToggle = document.getElementById("chat-toggle");
+  const chatBox = document.getElementById("chat-box");
+  const chatClose = document.getElementById("chat-close");
+  const sendBtn = document.getElementById("send-btn");
+  const input = document.getElementById("user-input");
+  const messages = document.getElementById("chat-messages");
 
-let greeted = false;
-
-// Open chat
-chatToggle.onclick = () => {
-  chatBox.style.display = "flex";
-
-  // AI sends first message (only once per page load)
-  if (!greeted) {
-    addMessage(
-      "bot",
-      "Assalamu’alaikum. I can help explain features or guide you to pages like attendance or dashboard."
-    );
-    greeted = true;
+  if (!chatToggle || !chatBox || !sendBtn || !input || !messages) {
+    console.error("Chat UI elements missing");
+    return;
   }
-};
 
-// Close chat
-chatClose.onclick = () => {
-  chatBox.style.display = "none";
-};
+  let greeted = false;
+  let isSending = false;
 
-// Add message to UI
-function addMessage(role, text) {
-  const div = document.createElement("div");
-  div.className =
-    role === "user"
-      ? "message-wrapper user-msg"
-      : "message-wrapper bot-msg";
-  div.textContent = text;
-  messages.appendChild(div);
-  messages.scrollTop = messages.scrollHeight;
-}
+  // Open chat
+  chatToggle.addEventListener("click", () => {
+    chatBox.style.display = "flex";
 
-// Send on button or Enter
-sendBtn.onclick = sendMessage;
-input.addEventListener("keypress", e => {
-  if (e.key === "Enter") sendMessage();
-});
+    if (!greeted) {
+      addMessage(
+        "bot",
+        "Assalamu’alaikum. I can help explain features or guide you to pages like attendance or dashboard."
+      );
+      greeted = true;
+    }
+  });
 
-function sendMessage() {
-  const text = input.value.trim();
-  if (!text) return;
+  // Close chat
+  chatClose?.addEventListener("click", () => {
+    chatBox.style.display = "none";
+  });
 
-  addMessage("user", text);
-  input.value = "";
+  // Add message to UI
+  function addMessage(role, text) {
+    const div = document.createElement("div");
+    div.className =
+      role === "user"
+        ? "message-wrapper user-msg"
+        : "message-wrapper bot-msg";
+    div.textContent = text;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
 
-  fetch("/chat", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ message: text })
-  })
-    .then(res => res.json())
-    .then(data => {
-      // Navigation intent
-      if (data.action === "navigate" && data.redirect) {
-        addMessage("bot", "Taking you there...");
-        setTimeout(() => {
-          window.location.href = data.redirect;
-        }, 800);
-      }
-      // Normal chat reply
-      else if (data.action === "chat") {
-        addMessage("bot", data.message);
-      }
-      // Fallback safety
-      else {
-        addMessage("bot", "I'm sorry, I didn't understand that.");
-      }
+  // Enter to send, Shift+Enter for newline
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendMessage();
+    }
+  });
+
+  sendBtn.addEventListener("click", sendMessage);
+
+  function sendMessage() {
+    if (isSending) return;
+
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMessage("user", text);
+    input.value = "";
+    isSending = true;
+    sendBtn.disabled = true;
+
+    fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: text })
     })
-    .catch(() => {
-      addMessage("bot", "Error contacting server.");
-    });
-}
+      .then(res => {
+        if (!res.ok) throw new Error("Server error");
+        return res.json();
+      })
+      .then(data => {
+        if (data?.action === "navigate" && data.redirect) {
+          addMessage("bot", "Taking you there...");
+          setTimeout(() => {
+            window.location.href = data.redirect;
+          }, 700);
+        } else if (data?.action === "chat" && data.message) {
+          addMessage("bot", data.message);
+        } else {
+          addMessage("bot", "I’m not sure how to help with that.");
+        }
+      })
+      .catch(err => {
+        console.error(err);
+        addMessage("bot", "Error contacting server.");
+      })
+      .finally(() => {
+        isSending = false;
+        sendBtn.disabled = false;
+      });
+  }
+});
