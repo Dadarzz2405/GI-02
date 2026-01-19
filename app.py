@@ -391,8 +391,8 @@ def attendance_mark():
     if current_user.role not in ['admin', 'ketua']:
         abort(403)
     sessions = Session.query.all()
-    users = User.query.filter(User.role == 'member').all()
-    return render_template('attendance_mark.html', sessions=sessions, users=users)
+    users = User.query.filter(User.role.in_(['admin', 'ketua'])).all()
+    return render_template('attendance_mark_core.html', sessions=sessions, users=users)
 
 @app.route('/attendance', methods=['GET', 'POST'])
 @login_required
