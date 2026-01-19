@@ -121,7 +121,7 @@ def create_session():
         date = request.form['date']
         pic_id = request.form.get('pic_id')
 
-        new_session = Session(naame=name, date=date, pic_id=pic_id)
+        new_session = Session(name=name, date=date, pic_id=pic_id)
         db.session.add(new_session)
         db.session.commit()
         return redirect(url_for('dashboard_admin'))
