@@ -1,71 +1,127 @@
-/********** Template CSS **********/
 :root {
-    --primary: #10b981; /* Emerald 500 */
-    --primary-dark: #059669; /* Emerald 600 */
-    --primary-light: #34d399; /* Emerald 400 */
-    --secondary: #0ea5e9; /* Sky 500 */
+    --primary: #059669; /* Emerald 600 */
+    --primary-hover: #047857; /* Emerald 700 */
+    --primary-light: #ecfdf5; /* Emerald 50 */
+    --secondary: #d97706; /* Amber 600 */
+    --accent: #f59e0b; /* Amber 500 */
     --dark: #064e3b; /* Emerald 900 */
-    --light: #f0fdf4; /* Emerald 50 */
-    --glass: rgba(255, 255, 255, 0.9);
+    --bg-body: #f8fafc;
+    --card-bg: #ffffff;
+    --text-main: #1e293b;
+    --text-muted: #64748b;
+    --shadow-sm: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
 body {
-    font-family: 'Inter', 'Heebo', sans-serif;
-    background: radial-gradient(circle at top right, #d1fae5, #f0fdf4);
-    color: var(--dark);
-    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    line-height: 1.6;
 }
 
+/* Navbar */
 .navbar {
-    background: var(--glass) !important;
-    backdrop-filter: blur(16px);
-    border-bottom: 2px solid rgba(16, 185, 129, 0.1);
-    transition: all 0.3s ease;
+    background-color: #fff !important;
+    border-bottom: 1px solid #e2e8f0;
+    box-shadow: var(--shadow-sm);
 }
 
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: var(--text-main) !important;
+    padding: 1rem 1.25rem !important;
+    transition: color 0.2s;
+}
+
+.nav-link:hover {
+    color: var(--primary) !important;
+}
+
+/* Cards */
 .card {
-    background: var(--glass);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(16, 185, 129, 0.2);
-    border-radius: 24px;
-    box-shadow: 0 10px 40px rgba(6, 78, 59, 0.05);
+    border: none;
+    border-radius: 1rem;
+    box-shadow: var(--shadow-md);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--card-bg);
 }
 
 .card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 50px rgba(6, 78, 59, 0.1);
-    border-color: var(--primary-light);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.625rem 1.25rem;
+    border-radius: 0.5rem;
+    font-weight: 600;
+    transition: all 0.2s;
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-    border: none;
-    border-radius: 14px;
-    box-shadow: 0 8px 16px rgba(16, 185, 129, 0.2);
+    background-color: var(--primary);
+    border-color: var(--primary);
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 12px 24px rgba(16, 185, 129, 0.3);
+    background-color: var(--primary-hover);
+    border-color: var(--primary-hover);
+    transform: translateY(-1px);
 }
 
+/* Form Controls */
 .form-control, .form-select {
-    border-radius: 14px;
-    border: 2px solid #e2e8f0;
-    padding: 14px 18px;
-    background: #fff;
+    padding: 0.75rem 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
 }
 
 .form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
 }
 
-.role-badge {
-    padding: 8px 16px;
-    border-radius: 12px;
-    background: rgba(16, 185, 129, 0.1);
-    color: var(--primary-dark);
-    border: 1px solid var(--primary-light);
+/* Components */
+.alert {
+    border-radius: 0.75rem;
+    border: none;
 }
 
+.back-to-top {
+    position: fixed;
+    right: 2rem;
+    bottom: 2rem;
+    z-index: 99;
+    background-color: var(--primary);
+    border: none;
+    border-radius: 50%;
+    width: 3rem;
+    height: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: var(--shadow-lg);
+}
+
+/* Profile Picture */
+.profile-pfp {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid var(--primary-light);
+}
+
+/* Attendance Badges */
+.badge-present { background-color: #dcfce7; color: #166534; }
+.badge-absent { background-color: #fee2e2; color: #991b1b; }
+.badge-excused { background-color: #fef3c7; color: #92400e; }
