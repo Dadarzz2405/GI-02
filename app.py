@@ -223,12 +223,13 @@ def api_attendance_core():
     if exists:
         return jsonify({"error": "already_marked"}), 409
 
+    wib = timezone(timedelta(hours=7))
     att = Attendance(
         session_id=session_id,
         user_id=user_id,
         status=status,
         attendance_type="core",
-        timestamp=datetime.utcnow()
+        timestamp=datetime.now(wib)
     )
 
     db.session.add(att)
@@ -425,7 +426,7 @@ def attendance():
             if status:
                 existing = Attendance.query.filter_by(session_id=session_id, user_id=member.id).first()
                 if not existing:
-                    attendance = Attendance(session_id=session_id, user_id=member.id, status=status, attendance_type='regular')
+                    attendance = Attendance(session_id=session_id, user_id=member.id, status=status, attendance_type='regular', timestamp=datetime.now(wib))
                     db.session.add(attendance)
         db.session.commit()
         flash('Attendance saved', 'success')
