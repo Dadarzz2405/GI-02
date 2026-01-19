@@ -6,3 +6,6 @@ def can_mark_attendance(user, target_pic_id):
         return True
 
     return False
+
+def is_core_user(user):
+    return user.role in ["admin", "ketua"]

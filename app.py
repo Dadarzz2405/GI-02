@@ -1,4 +1,4 @@
-from utils import can_mark_attendance
+from utils import can_mark_attendance, is_core_user
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort, Response, Blueprint
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
@@ -166,6 +166,67 @@ def api_attendance():
     )
 
     db.session.add(attendance)
+    db.session.commit()
+
+    return jsonify({"success": True})
+
+@app.route("/attendance/core")
+@login_required
+def attendance_core():
+    if not is_core_user(current_user):
+        abort(403)
+
+    sessions = Session.query.order_by(Session.date.desc()).all()
+    core_users = User.query.filter(User.role.in_(["admin", "ketua"])).all()
+
+    return render_template(
+        "attendance_mark_core.html",
+        sessions=sessions,
+        core_users=core_users
+    )
+
+@app.route("/api/attendance/core", methods=["POST"])
+@login_required
+def api_attendance_core():
+    if not is_core_user(current_user):
+        return jsonify({"error": "forbidden"}), 403
+
+    data = request.get_json()
+    session_id = data.get("session_id")
+    user_id = data.get("user_id")
+    status = data.get("status")
+
+    if not all([session_id, user_id, status]):
+        return jsonify({"error": "invalid_data"}), 400
+
+    session = Session.query.get_or_404(session_id)
+
+    if session.is_locked:
+        return jsonify({"error": "session_locked"}), 403
+
+    user = User.query.get_or_404(user_id)
+
+    if not is_core_user(user):
+        return jsonify({"error": "not_core_user"}), 400
+
+    exists = Attendance.query.filter_by(
+        session_id=session_id,
+        user_id=user_id,
+        attendance_type="core"
+    ).first()
+
+    if exists:
+        return jsonify({"error": "already_marked"}), 409
+
+    att = Attendance(
+        session_id=session_id,
+        user_id=user_id,
+        status=status,
+        attendance_type="core",
+        timestamp=datetime.utcnow()
+    )
+
+    db.session.add(att)
     db.session.commit()
 
     return jsonify({"success": True})
