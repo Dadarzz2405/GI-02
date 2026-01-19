@@ -182,7 +182,7 @@ def attendance_core():
     return render_template(
         "attendance_mark_core.html",
         sessions=sessions,
-        core_users=core_users
+        users=users
     )
 
 @app.route("/api/attendance/core", methods=["POST"])
