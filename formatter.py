@@ -11,7 +11,7 @@ Rules:
 - Do NOT add commentary.
 - Do NOT invent data.
 - Do NOT remove records.
-- Preserve names, statuses, and timestamps exactly as provided.
+- Format timestamps as HH:MM (24-hour format, WIB time) without seconds. Preserve names and statuses exactly as provided.
 - Output must be plain text.
 - Use this exact column order:
   Name | Status | Timestamp | Note

@@ -5,7 +5,7 @@ from flask_login import LoginManager, login_user, logout_user, login_required, c
 from flask_bcrypt import Bcrypt
 import os
 from models import Pic, db, User, Session, Attendance
-from datetime import datetime, date
+from datetime import datetime, date, timezone, timedelta
 from ummalqura.hijri_date import HijriDate
 import json
 from werkzeug.utils import secure_filename
@@ -159,12 +159,13 @@ def api_attendance():
     if record:
         return jsonify({"error": "already_marked"}), 409
 
+    wib = timezone(timedelta(hours=7))
     attendance = Attendance(
         session_id=session_id,
         user_id=user_id,
         status=status,
         attendance_type='regular',
-        timestamp=datetime.utcnow()
+        timestamp=datetime.now(wib)
     )
 
     db.session.add(attendance)
@@ -293,9 +294,11 @@ def export_attendance_csv(session_id):
     )
 
     # Prepare text for formatter
+    wib = timezone(timedelta(hours=7))
     text_input = f"Session: {session.name} on {session.date}\n"
     for attendance, name, email in records:
-        text_input += f"{name} | {attendance.status} | {attendance.timestamp}\n"
+        formatted_time = attendance.timestamp.astimezone(wib).strftime("%H:%M")
+        text_input += f"{name} | {attendance.status} | {formatted_time}\n"
 
     # Format with AI
     formatted = format_attendance(text_input)
