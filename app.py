@@ -272,7 +272,7 @@ def manage_pics():
 @app.route("/export/attendance/<int:session_id>")
 @login_required
 def export_attendance_csv(session_id):
-    if current_user.role not in ["admin", "ketua", "pembina"]:
+    if current_user.role not in ["admin", "ketua"]:
         abort(403)
 
     session = Session.query.get_or_404(session_id)
@@ -388,7 +388,7 @@ def attendance_history_admin_view(user_id):
 @app.route('/attendance-mark')
 @login_required
 def attendance_mark():
-    if current_user.role not in ['admin', 'ketua', 'pembina']:
+    if current_user.role not in ['admin', 'ketua']:
         abort(403)
     sessions = Session.query.all()
     users = User.query.filter(User.role == 'member').all()
