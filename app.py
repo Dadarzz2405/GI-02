@@ -1,4 +1,3 @@
-from scipy import io
 from utils import can_mark_attendance
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort, Response, Blueprint
 from flask_sqlalchemy import SQLAlchemy
