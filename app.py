@@ -484,11 +484,13 @@ def upload_pfp():
     if not file or file.filename == '':
         flash('No file selected', 'error')
         return redirect(url_for('profile'))
-    if not allowed_file(file.filename):
+    
+    filename_attr = getattr(file, 'filename', '')
+    if not filename_attr or not allowed_file(filename_attr):
         flash('Invalid file type. Allowed types: png, jpg, jpeg, webp', 'error')
         return redirect(url_for('profile'))
     
-    ext = file.filename.rsplit('.', 1)[1].lower()
+    ext = filename_attr.rsplit('.', 1)[1].lower()
     filename = f"user_{current_user.id}.{ext}"
     filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
     file.save(filepath)
@@ -548,7 +550,7 @@ def get_hijri_date(gregorian_date):
     try:
         g = datetime.strptime(gregorian_date, "%Y-%m-%d").date()
         h = HijriDate(g.year, g.month, g.day, gr=True)
-        return f"{h.day} {h.month_name()} {h.year} H"
+        return f"{h.day} {h.month_name} {h.year} H"
     except Exception:
         return ""
 
