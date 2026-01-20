@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     class_name = db.Column(db.String(50))
     profile_picture = db.Column(db.String(255), default='default.png')
     pic_id = db.Column(db.Integer, db.ForeignKey('pic.id', name='fk_user_pic'), nullable=True)
+    division_id = db.Column(db.Integer, db.ForeignKey('division.id'), nullable=True)
     can_mark_attendance = db.Column(db.Boolean, default=False)  # New field
 class Session(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -37,3 +38,17 @@ class Pic(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(150), unique=True, nullable=False)
     members = db.relationship('User', backref='pic', lazy=True)
+
+class Division(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(150), unique=True, nullable=False)
+    members = db.relationship('User', backref='division', lazy=True)
+
+class Notulensi(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.Integer, db.ForeignKey("session.id"), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, onupdate=datetime.utcnow)
+
+    session = db.relationship("Session", backref="notulensi")

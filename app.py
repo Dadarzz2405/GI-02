@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 import os
-from models import Pic, db, User, Session, Attendance
+from models import Pic, db, User, Session, Attendance, Notulensi
 from datetime import datetime, date, timezone, timedelta
 from ummalqura.hijri_date import HijriDate
 import json
@@ -686,6 +686,26 @@ def pic_management():
         pics=pics,
         users=users
     )
+
+@app.route("/api/notulensi/<int:session_id>", methods=["POST"])
+@login_required
+def save_notulensi(session_id):
+    data = request.get_json()
+    content = data.get("content")
+
+    if not content:
+        return jsonify({"error": "empty"}), 400
+
+    note = Notulensi.query.filter_by(session_id=session_id).first()
+
+    if note:
+        note.content = content
+    else:
+        note = Notulensi(session_id=session_id, content=content)
+        db.session.add(note)
+
+    db.session.commit()
+    return jsonify({"success": True})
 
 @app.errorhandler(403)
 def forbidden(e):
