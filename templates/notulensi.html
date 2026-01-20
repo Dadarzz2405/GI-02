@@ -1,27 +1,39 @@
 {% extends "base.html" %}
-{% block title %}Notulensi — {{ session.name }} — Rohis{% endblock %}
+{% block title %}{{ 'Edit' if note else 'Create' }} Notulensi — {{ session.name }} — Rohis{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
     <div class="card shadow p-4">
         <div class="d-flex justify-content-between align-items-center mb-3">
-            <h3 class="fw-bold mb-0">
-                Notulensi — {{ session.name }}
-            </h3>
-            <a href="{{ url_for('notulensi_list') }}" class="btn btn-outline-secondary">Back to List</a>
-        </div>
-        
-        <div class="mb-3">
-            <small class="text-muted">Session Date: {{ session.date }}</small>
+            <div>
+                <h3 class="fw-bold mb-2">
+                    <i class="fas fa-{{ 'edit' if note else 'plus-circle' }} text-primary me-2"></i>
+                    {{ 'Edit' if note else 'Create' }} Notulensi
+                </h3>
+                <p class="text-muted mb-0">
+                    {{ session.name }} — {{ session.date }}
+                </p>
+            </div>
+            <a href="{{ url_for('notulensi_list') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
         </div>
 
-        <div id="editor" style="height:400px">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            <strong>Tip:</strong> Use the toolbar to format your text. Changes are saved when you click the Save button.
+        </div>
+
+        <div id="editor" style="min-height: 400px; background: white;">
             {{ note.content|safe if note else "" }}
         </div>
 
-        <button id="saveBtn" class="btn btn-success mt-3">
-            <i class="fas fa-save me-2"></i>Save Notulensi
-        </button>
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <div id="saveStatus" class="text-muted small"></div>
+            <button id="saveBtn" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>Save Notulensi
+            </button>
+        </div>
     </div>
 </div>
 
@@ -33,20 +45,53 @@ const quill = new Quill('#editor', {
     theme: 'snow',
     modules: {
         toolbar: [
-            ['bold', 'italic', 'underline'],
-            [{ 'header': [1, 2, false] }],
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike'],
             [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{ 'color': [] }, { 'background': [] }],
+            [{ 'align': [] }],
+            ['link'],
             ['clean']
         ]
+    },
+    placeholder: 'Start writing the meeting minutes here...'
+});
+
+const saveBtn = document.getElementById("saveBtn");
+const saveStatus = document.getElementById("saveStatus");
+
+// Auto-save indicator
+let hasUnsavedChanges = false;
+quill.on('text-change', () => {
+    hasUnsavedChanges = true;
+    saveStatus.innerHTML = '<i class="fas fa-circle text-warning me-2"></i>Unsaved changes';
+});
+
+// Warn before leaving with unsaved changes
+window.addEventListener('beforeunload', (e) => {
+    if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
     }
 });
 
-document.getElementById("saveBtn").onclick = async () => {
+saveBtn.onclick = async () => {
     const content = quill.root.innerHTML;
-    const saveBtn = document.getElementById("saveBtn");
+    
+    // Check if content is empty
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = content;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+    
+    if (!textContent.trim()) {
+        alert('Cannot save empty notulensi. Please write something first.');
+        return;
+    }
     
     saveBtn.disabled = true;
     saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Saving...';
+    saveStatus.innerHTML = '<i class="fas fa-spinner fa-spin text-primary me-2"></i>Saving...';
 
     try {
         const res = await fetch(
@@ -59,21 +104,60 @@ document.getElementById("saveBtn").onclick = async () => {
         );
 
         if (res.ok) {
-            saveBtn.innerHTML = '<i class="fas fa-check me-2"></i>Saved!';
+            hasUnsavedChanges = false;
+            saveBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Saved!';
+            saveBtn.classList.remove('btn-success');
+            saveBtn.classList.add('btn-success');
+            saveStatus.innerHTML = '<i class="fas fa-check-circle text-success me-2"></i>All changes saved';
+            
             setTimeout(() => {
                 saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Notulensi';
                 saveBtn.disabled = false;
             }, 2000);
         } else {
-            alert("Failed to save. Please try again.");
+            const data = await res.json();
+            alert(data.error || "Failed to save. Please try again.");
             saveBtn.disabled = false;
             saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Notulensi';
+            saveStatus.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Save failed';
         }
     } catch (error) {
+        console.error('Error:', error);
         alert("Error saving. Please check your connection.");
         saveBtn.disabled = false;
         saveBtn.innerHTML = '<i class="fas fa-save me-2"></i>Save Notulensi';
+        saveStatus.innerHTML = '<i class="fas fa-exclamation-circle text-danger me-2"></i>Connection error';
     }
 };
+
+// Keyboard shortcut: Ctrl+S or Cmd+S to save
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        saveBtn.click();
+    }
+});
 </script>
+
+<style>
+.ql-toolbar {
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+}
+
+.ql-container {
+    border-radius: 0 0 8px 8px;
+    font-size: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.ql-editor {
+    min-height: 400px;
+}
+
+.ql-editor.ql-blank::before {
+    color: #6c757d;
+    font-style: italic;
+}
+</style>
 {% endblock %}

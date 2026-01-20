@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}View Notulensi — {{ session.name }} — Rohis{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-2">
+                    <i class="fas fa-file-alt text-primary me-2"></i>{{ session.name }}
+                </h3>
+                <p class="text-muted mb-0">
+                    <i class="fas fa-calendar-alt me-2"></i>{{ session.date }}
+                </p>
+            </div>
+            <div>
+                {% if can_edit %}
+                <a href="{{ url_for('notulensi', session_id=session.id) }}" class="btn btn-primary me-2">
+                    <i class="fas fa-edit me-2"></i>Edit
+                </a>
+                {% endif %}
+                <a href="{{ url_for('notulensi_list') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back
+                </a>
+            </div>
+        </div>
+
+        <hr class="mb-4">
+
+        <div class="notulensi-content bg-light p-4 rounded">
+            {{ note.content|safe }}
+        </div>
+
+        <div class="mt-4 text-muted small">
+            <i class="fas fa-info-circle me-2"></i>
+            {% if note.updated_at %}
+                Last updated: {{ note.updated_at.strftime('%A, %d %B %Y at %H:%M') }}
+            {% else %}
+                Created: {{ note.created_at.strftime('%A, %d %B %Y at %H:%M') }}
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.notulensi-content {
+    min-height: 300px;
+    line-height: 1.8;
+}
+
+.notulensi-content h1 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+}
+
+.notulensi-content h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.8rem;
+    color: var(--dark);
+}
+
+.notulensi-content p {
+    margin-bottom: 1rem;
+}
+
+.notulensi-content ul, 
+.notulensi-content ol {
+    margin-bottom: 1rem;
+    padding-left: 2rem;
+}
+
+.notulensi-content li {
+    margin-bottom: 0.5rem;
+}
+</style>
+{% endblock %}

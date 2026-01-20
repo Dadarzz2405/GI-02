@@ -694,6 +694,7 @@ def save_notulensi(session_id):
 
     if note:
         note.content = content
+        note.updated_at = datetime.utcnow()
     else:
         note = Notulensi(session_id=session_id, content=content)
         db.session.add(note)
@@ -701,11 +702,23 @@ def save_notulensi(session_id):
     db.session.commit()
     return jsonify({"success": True})
 
+@app.route("/api/notulensi/<int:notulensi_id>", methods=["DELETE"])
+@login_required
+def delete_notulensi(notulensi_id):
+    if current_user.role not in ['admin', 'ketua', 'pembina']:
+        return jsonify({"error": "forbidden"}), 403
+    
+    note = Notulensi.query.get_or_404(notulensi_id)
+    db.session.delete(note)
+    db.session.commit()
+    
+    return jsonify({"success": True})
+
 @app.route("/notulensi-list")
 @login_required
 def notulensi_list():
-    # Get all sessions
-    sessions = Session.query.all()
+    # Get all sessions ordered by date (newest first)
+    sessions = Session.query.order_by(Session.date.desc()).all()
     # Get all notulensi for quick lookup
     notulensis = Notulensi.query.all()
     notulensi_dict = {n.session_id: n for n in notulensis}
@@ -715,11 +728,24 @@ def notulensi_list():
 @app.route("/notulensi/<int:session_id>")
 @login_required
 def notulensi(session_id):
-    if current_user.role not in ['admin', 'ketua', 'pembina']:
-        abort(403)
     session = Session.query.get_or_404(session_id)
     note = Notulensi.query.filter_by(session_id=session_id).first()
-    return render_template("notulensi.html", session=session, note=note)
+    
+    # Check permissions for editing
+    can_edit = current_user.role in ['admin', 'ketua', 'pembina']
+    
+    return render_template("notulensi.html", session=session, note=note, can_edit=can_edit)
+
+@app.route("/notulensi/view/<int:notulensi_id>")
+@login_required
+def notulensi_view(notulensi_id):
+    """View full notulensi content (read-only for members)"""
+    note = Notulensi.query.get_or_404(notulensi_id)
+    session = Session.query.get_or_404(note.session_id)
+    
+    can_edit = current_user.role in ['admin', 'ketua', 'pembina']
+    
+    return render_template("notulensi_view.html", session=session, note=note, can_edit=can_edit)
 
 @app.errorhandler(403)
 def forbidden(e):
