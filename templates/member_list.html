@@ -5,42 +5,183 @@
 {% block content %}
 <div class="mt-4">
     <div class="card shadow p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h2 class="fw-bold mb-0">Member List</h2>
-            <!-- Add Member functionality removed - using new login system -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="fw-bold mb-1">
+                    <i class="fas fa-users text-primary me-2"></i>Member List
+                </h2>
+                <p class="text-muted mb-0">Total Members: {{ users|length }}</p>
+            </div>
+            <a href="{% if current_user.role in ['admin', 'ketua', 'pembina'] %}{{ url_for('dashboard_admin') }}{% else %}{{ url_for('dashboard_member') }}{% endif %}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+            </a>
         </div>
 
-        <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle mb-0">
-            <thead class="table-light">
-                <tr>
-                    <th>Name</th>
-                    <th>Class</th>
-                    <th>Role</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in users %}
-                <tr>
-                    <td>{{ u.name }}</td>
-                    <td>{{ u.class_name }}</td>
-                    <td>
-                        {% if u.role == 'member' %}
-                            <span class="role-badge role-member">Member</span>
-                        {% elif u.role == 'admin' %}
-                            <span class="role-badge role-admin">Admin</span>
-                        {% elif u.role == 'ketua' %}
-                            <span class="role-badge role-ketua">Ketua</span>
-                        {% elif u.role == 'pembina' %}
-                            <span class="role-badge role-pembina">Pembina</span>
+        <!-- Filter by Role -->
+        <div class="mb-4">
+            <div class="btn-group" role="group" aria-label="Filter by role">
+                <button type="button" class="btn btn-outline-primary active" onclick="filterRole('all', this)">
+                    All Members
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="filterRole('admin', this)">
+                    Admins
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="filterRole('ketua', this)">
+                    Ketua
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="filterRole('pembina', this)">
+                    Pembina
+                </button>
+                <button type="button" class="btn btn-outline-primary" onclick="filterRole('member', this)">
+                    Members
+                </button>
+            </div>
+        </div>
+
+        <!-- Member Cards Grid -->
+        <div class="row g-4" id="memberGrid">
+            {% for u in users %}
+            <div class="col-md-6 col-lg-4 col-xl-3 member-card" data-role="{{ u.role }}">
+                <div class="card h-100 shadow-sm hover-card">
+                    <div class="card-body text-center">
+                        <!-- Profile Picture -->
+                        <div class="mb-3">
+                            <img
+                                src="{{ url_for('static', filename='uploads/profiles/' ~ (u.profile_picture if u.profile_picture else 'default.png')) }}"
+                                data-fallback="{{ url_for('static', filename='uploads/profiles/default.png') }}"
+                                alt="{{ u.name }}"
+                                class="rounded-circle shadow-sm"
+                                style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-primary);"
+                                onerror="this.src = this.dataset.fallback;"
+                            >
+
+                        </div>
+
+                        <!-- Name -->
+                        <h5 class="card-title fw-bold mb-1">{{ u.name }}</h5>
+                        
+                        <!-- Class -->
+                        <p class="text-muted small mb-2">
+                            <i class="fas fa-graduation-cap me-1"></i>{{ u.class_name or 'N/A' }}
+                        </p>
+
+                        <!-- Email -->
+                        <p class="text-muted small mb-3" style="font-size: 0.8rem; word-break: break-word;">
+                            <i class="fas fa-envelope me-1"></i>{{ u.email }}
+                        </p>
+
+                        <!-- Role Badge -->
+                        <div class="mb-2">
+                            {% if u.role == 'admin' %}
+                                <span class="badge bg-danger px-3 py-2">
+                                    <i class="fas fa-shield-alt me-1"></i>Admin
+                                </span>
+                            {% elif u.role == 'ketua' %}
+                                <span class="badge bg-primary px-3 py-2">
+                                    <i class="fas fa-crown me-1"></i>Ketua
+                                </span>
+                            {% elif u.role == 'pembina' %}
+                                <span class="badge bg-info px-3 py-2">
+                                    <i class="fas fa-user-tie me-1"></i>Pembina
+                                </span>
+                            {% else %}
+                                <span class="badge bg-secondary px-3 py-2">
+                                    <i class="fas fa-user me-1"></i>Member
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <!-- PIC Badge (if assigned) -->
+                        {% if u.pic %}
+                        <div>
+                            <span class="badge bg-success px-2 py-1">
+                                <i class="fas fa-sitemap me-1"></i>{{ u.pic.name }}
+                            </span>
+                        </div>
                         {% endif %}
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+                        <!-- Attendance Permission Badge -->
+                        {% if u.can_mark_attendance %}
+                        <div class="mt-2">
+                            <span class="badge bg-warning text-dark px-2 py-1">
+                                <i class="fas fa-clipboard-check me-1"></i>Can Mark Attendance
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
 
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-users-slash fa-4x text-muted mb-3"></i>
+            <h5 class="text-muted">No members found for this filter</h5>
+        </div>
     </div>
 </div>
+
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.hover-card:hover {
+    transform: translateY(-8px);
+    border-color: var(--primary);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.15) !important;
+}
+
+.btn-group .btn {
+    transition: all 0.2s ease;
+}
+
+.btn-group .btn.active {
+    background-color: var(--primary);
+    color: white;
+    border-color: var(--primary);
+}
+
+.member-card {
+    transition: opacity 0.3s ease;
+}
+
+.member-card.hidden {
+    display: none;
+}
+</style>
+
+<script>
+function filterRole(role, element) {
+    // Update button states
+    document.querySelectorAll('.btn-group .btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    element.classList.add('active');
+
+    // Filter cards
+    const cards = document.querySelectorAll('.member-card');
+    const emptyState = document.getElementById('emptyState');
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+        const cardRole = card.getAttribute('data-role');
+        if (role === 'all' || cardRole === role) {
+            card.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            card.classList.add('hidden');
+        }
+    });
+
+    // Show empty state if no cards visible
+    if (visibleCount === 0) {
+        emptyState.style.display = 'block';
+    } else {
+        emptyState.style.display = 'none';
+    }
+}
+</script>
 {% endblock %}

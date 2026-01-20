@@ -294,24 +294,20 @@ def export_attendance_csv(session_id):
         .all()
     )
 
-    # Prepare text for formatter
     wib = timezone(timedelta(hours=7))
     text_input = f"Session: {session.name} on {session.date}\n"
     for attendance, name, email in records:
         formatted_time = attendance.timestamp.astimezone(wib).strftime("%H:%M")
         text_input += f"{name} | {attendance.status} | {formatted_time}\n"
 
-    # Format with AI
     formatted = format_attendance(text_input)
 
-    # Create DOCX
     doc = Document()
     doc.add_heading(f'Attendance Report: {session.name}', 0)
     doc.add_paragraph(f'Date: {session.date}')
     doc.add_paragraph('Formatted Records:')
     doc.add_paragraph(formatted)
 
-    # Save to BytesIO
     bio = BytesIO()
     doc.save(bio)
     bio.seek(0)
@@ -336,7 +332,7 @@ def delete_pic(id):
 
     for user in pic.members:
         user.pic_id = None
-        user.can_mark_attendance = False  # 🔥 IMPORTANT
+        user.can_mark_attendance = False  
 
     db.session.delete(pic)
     db.session.commit()
@@ -717,9 +713,7 @@ def delete_notulensi(notulensi_id):
 @app.route("/notulensi-list")
 @login_required
 def notulensi_list():
-    # Get all sessions ordered by date (newest first)
     sessions = Session.query.order_by(Session.date.desc()).all()
-    # Get all notulensi for quick lookup
     notulensis = Notulensi.query.all()
     notulensi_dict = {n.session_id: n for n in notulensis}
     
@@ -731,7 +725,6 @@ def notulensi(session_id):
     session = Session.query.get_or_404(session_id)
     note = Notulensi.query.filter_by(session_id=session_id).first()
     
-    # Check permissions for editing
     can_edit = current_user.role in ['admin', 'ketua', 'pembina']
     
     return render_template("notulensi.html", session=session, note=note, can_edit=can_edit)
