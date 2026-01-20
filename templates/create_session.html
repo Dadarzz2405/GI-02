@@ -6,32 +6,73 @@
 <div class="mt-4 d-flex justify-content-center">
     <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
 
-        <h3 class="fw-bold">Create New Session</h3>
+        <div class="mb-4">
+            <h3 class="fw-bold mb-1">
+                <i class="fas fa-calendar-plus text-primary me-2"></i>Create New Session
+            </h3>
+            <p class="text-muted mb-0">Schedule a new Rohis meeting or event</p>
+        </div>
 
         <form method="POST">
             <div class="mb-3">
-                <label class="form-label">Session Name</label>
-                <input type="text" name="name" class="form-control" required>
+                <label class="form-label fw-semibold">
+                    <i class="fas fa-heading me-2"></i>Session Name
+                </label>
+                <input 
+                    type="text" 
+                    name="name" 
+                    class="form-control" 
+                    placeholder="e.g., Weekly Kajian, Ramadan Planning"
+                    required
+                >
+                <small class="text-muted">Give your session a descriptive name</small>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Date</label>
-                <input type="date" name="date" class="form-control" required>
+            <div class="mb-4">
+                <label class="form-label fw-semibold">
+                    <i class="fas fa-calendar-alt me-2"></i>Date
+                </label>
+                <input 
+                    type="date" 
+                    name="date" 
+                    class="form-control" 
+                    required
+                >
+                <small class="text-muted">When will this session take place?</small>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">PIC</label>
-                <select name="pic_id" class="form-select" required>
-                    <option value="">Select PIC</option>
-                    {% for pic in pics %}
-                    <option value="{{ pic.id }}">{{ pic.name }}</option>
-                    {% endfor %}
-                </select>
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus-circle me-2"></i>Create Session
+                </button>
+                <a href="{{ url_for('dashboard_admin') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Cancel
+                </a>
             </div>
-
-            <button class="btn btn-primary w-100">Create</button>
         </form>
 
     </div>
 </div>
+
+<style>
+.card {
+    border-radius: 15px;
+}
+
+.form-control:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 0.2rem rgba(5, 150, 105, 0.25);
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+    border: none;
+    transition: transform 0.2s;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+</style>
 {% endblock %}
