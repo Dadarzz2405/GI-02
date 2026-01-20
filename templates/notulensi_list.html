@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Daftar Notulensi</h2>
+    <div class="list-group">
+        {% for note in notes %}
+        <div class="list-group-item">
+            <h5 class="mb-1">{{ note.session.name }}</h5>
+            <p class="mb-1">{{ note.content|safe|truncate(200) }}</p>
+            <small>Terakhir diupdate: {{ note.updated_at.strftime('%Y-%m-%d %H:%M') if note.updated_at else note.created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+        </div>
+        {% else %}
+        <p>Belum ada notulensi.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

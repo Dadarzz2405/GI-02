@@ -698,6 +698,12 @@ def save_notulensi(session_id):
     db.session.commit()
     return jsonify({"success": True})
 
+@app.route("/notulensi")
+@login_required
+def notulensi_list():
+    notes = Notulensi.query.all()
+    return render_template("notulensi_list.html", notes=notes)
+
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
