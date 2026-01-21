@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
 {% block title %}Login | Rohis Attendance System{% endblock %}
-
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='login.css') }}">
+{% endblock %}
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 80vh;">
     <div class="card p-5 wow fadeInUp" style="width: 100%; max-width: 400px;">

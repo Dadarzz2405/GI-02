@@ -497,12 +497,12 @@ def upload_pfp():
 
 ISLAMIC_HOLIDAYS = {
     # Muharram
-    "01-01": "Islamic New Year (1 Muharram)",
+    "01-01": "Islamic New Year",
     "01-09": "Day of Tasua",
     "01-10": "Day of Ashura",
 
     # Rabi' al-Awwal
-    "03-12": "Mawlid al-Nabi (Prophet Muhammad's Birthday)",
+    "03-12": "Mawlid al-Nabi",
 
     # Rajab
     "07-01": "Start of Rajab",
@@ -517,15 +517,15 @@ ISLAMIC_HOLIDAYS = {
     "09-21": "Laylat al-Qadr (possible)",
     "09-23": "Laylat al-Qadr (possible)",
     "09-25": "Laylat al-Qadr (possible)",
-    "09-27": "Laylat al-Qadr (most observed)",
+    "09-27": "Laylat al-Qadr (possible)",
     "09-29": "Laylat al-Qadr (possible)",
 
     # Shawwal
     "10-01": "Eid al-Fitr",
-    "10-02": "Eid al-Fitr (2nd day – some regions)",
+    "10-02": "Eid al-Fitr ",
 
     # Dhu al-Qi'dah
-    "11-01": "Start of Dhu al-Qi'dah",
+    "11-01": "Start of Dhuqa'dah",
 
     # Dhu al-Hijjah
     "12-01": "Start of Dhu al-Hijjah",
@@ -540,6 +540,7 @@ ISLAMIC_HOLIDAYS = {
 @app.route("/calendar")
 @login_required
 def calendar():
+    
     return render_template("calendar.html")
 
 def get_hijri_date(gregorian_date):
@@ -549,7 +550,6 @@ def get_hijri_date(gregorian_date):
         return f"{h.day} {h.month_name} {h.year} H"
     except Exception:
         return ""
-
 
 def get_hijri_key_from_gregorian(g_date: date):
     h = HijriDate(g_date.year, g_date.month, g_date.day, gr=True)
