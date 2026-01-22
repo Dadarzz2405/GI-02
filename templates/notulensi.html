@@ -25,10 +25,6 @@
             <strong>Access Denied:</strong> You don't have permission to edit notulensi.
         </div>
         {% else %}
-        <div class="alert alert-info">
-            <i class="fas fa-info-circle me-2"></i>
-            <strong>Tip:</strong> Use the toolbar to format your text. Changes are saved when you click the Save button. Press Ctrl+S (or Cmd+S) for quick save.
-        </div>
 
         <div id="editor" style="min-height: 400px; background: white;">
             {{ note.content|safe if note else "" }}
