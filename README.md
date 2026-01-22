@@ -2,7 +2,6 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue.svg)
 ![Flask](https://img.shields.io/badge/Flask-3.1.2-green.svg)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
 ![Status](https://img.shields.io/badge/Status-Active-success.svg)
 
 A comprehensive web-based application designed to digitize and streamline the management of **Rohis (Rohani Islam)** activities in schools. This system helps administrators efficiently manage member data, track attendance, create meeting minutes, and organize Islamic events.
@@ -20,7 +19,6 @@ A comprehensive web-based application designed to digitize and streamline the ma
 - [Database Schema](#-database-schema)
 - [Contributing](#-contributing)
 - [Roadmap](#-roadmap)
-- [License](#-license)
 - [Acknowledgments](#-acknowledgments)
 
 ## ✨ Features
@@ -419,10 +417,6 @@ Contributions are welcome! Please follow these steps:
 - Profile picture upload limited to 5MB
 - Calendar may not display correctly in older browsers
 
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
 ## 🙏 Acknowledgments
 
 - **Groq** - For providing the AI API
@@ -435,8 +429,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Haidar Ali Fawwaz Nasirodin (Dadarzz)**
 
-This project was developed as a school project and personal portfolio, demonstrating practical application of web development concepts including Flask, SQLAlchemy, REST APIs, and modern front-end technologies.
-
+This project was developed as a school project and personal portfolio, demonstrating practical application of web development concepts including Flask, SQLAlchemy, REST APIs, and front-ends.
 ## 📧 Contact & Support
 
 For questions, issues, or suggestions:
@@ -450,4 +443,4 @@ For questions, issues, or suggestions:
 
 **⭐ If you find this project useful, please consider giving it a star!**
 
-Made by Dadarzz, for a Passion Project
+Made with ❤️ for the Rohis community
