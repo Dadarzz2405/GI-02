@@ -6,46 +6,288 @@
 <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/main.min.css" rel="stylesheet">
 
 <style>
-/* Calendar container */
+/* Calendar Container */
+#calendar-wrapper {
+    background: white;
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
 #calendar {
     max-width: 100%;
     margin: 0 auto;
 }
 
-/* Rohis sessions */
-.rohis-session {
-    background: linear-gradient(135deg, #1e88e5, #1565c0) !important;
-    border: none !important;
-    color: #fff !important;
-    border-radius: 6px;
-    font-weight: 500;
+/* Toolbar Enhancements */
+.fc .fc-toolbar {
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    margin-bottom: 20px;
 }
 
-/* Islamic holidays */
-.fc-event.islamic-holiday {
-    background: linear-gradient(135deg, #1e88e5, #1565c0) !important;
-    border: none !important;
-    color: #fff !important;
-    border-radius: 6px;
-    font-weight: 500;
+.fc .fc-toolbar-title {
+    font-size: 1.75rem !important;
+    font-weight: 800 !important;
+    color: var(--primary) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-/* Event hover animation */
-.fc-event:hover {
-    filter: brightness(1.1);
-    transform: translateY(-1px);
-    transition: 0.2s ease;
+.fc .fc-button {
+    background: white !important;
+    border: 2px solid var(--border-color) !important;
+    color: var(--text-main) !important;
+    padding: 8px 16px !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    text-transform: capitalize !important;
 }
 
-/* Event fade animation */
+.fc .fc-button:hover {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+}
+
+.fc .fc-button-active {
+    background: var(--primary) !important;
+    color: white !important;
+    border-color: var(--primary) !important;
+}
+
+.fc .fc-button:focus {
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.2) !important;
+}
+
+/* Day Headers */
+.fc .fc-col-header-cell {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 8px;
+    border: none;
+}
+
+.fc .fc-col-header-cell-cushion {
+    color: white;
+    padding: 4px;
+}
+
+/* Day Cells */
+.fc .fc-daygrid-day {
+    transition: background-color 0.2s ease;
+}
+
+.fc .fc-daygrid-day:hover {
+    background-color: #f0fdf4;
+}
+
+.fc .fc-daygrid-day-number {
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 8px;
+    color: var(--text-main);
+}
+
+/* Today Highlight */
+.fc .fc-day-today {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%) !important;
+    border: 2px solid var(--primary) !important;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+}
+
+/* Weekend Days */
+.fc .fc-day-sat,
+.fc .fc-day-sun {
+    background-color: #fafafa;
+}
+
+/* Event Styling */
 .fc-event {
-    animation: fadeInUp 0.25s ease;
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 4px 8px !important;
+    margin: 2px 0 !important;
+    font-weight: 600 !important;
+    font-size: 0.85rem !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
+.fc-event:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    filter: brightness(1.05);
+}
+
+/* Rohis Sessions */
+.rohis-session {
+    background: linear-gradient(135deg, #059669, #047857) !important;
+    color: white !important;
+}
+
+.rohis-session::before {
+    content: '📘 ';
+    margin-right: 4px;
+}
+
+/* Islamic Holidays */
+.islamic-holiday {
+    background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
+    color: white !important;
+}
+
+.islamic-holiday::before {
+    content: '🌙 ';
+    margin-right: 4px;
+}
+
+/* Event Dot for List View */
+.fc .fc-list-event-dot {
+    border-width: 6px !important;
+}
+
+/* List View Enhancements */
+.fc .fc-list-event:hover td {
+    background-color: var(--primary-light) !important;
+}
+
+.fc .fc-list-event-title {
+    font-weight: 600;
+}
+
+/* Loading State */
+.fc .fc-scroller-liquid-absolute {
+    overflow: hidden auto;
+}
+
+/* Legend */
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    flex-wrap: wrap;
+    padding: 16px;
+    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    transition: transform 0.2s ease;
+}
+
+.legend-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+.legend-color.rohis {
+    background: linear-gradient(135deg, #059669, #047857);
+}
+
+.legend-color.islamic {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+
+.legend-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+}
+
+/* Event Popup/Tooltip Enhancement */
+.fc .fc-popover {
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    border: none;
+}
+
+.fc .fc-popover-header {
+    background: var(--primary);
+    color: white;
+    padding: 12px;
+    border-radius: 12px 12px 0 0;
+}
+
+/* More Events Link */
+.fc .fc-daygrid-more-link {
+    color: var(--primary);
+    font-weight: 700;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.fc .fc-daygrid-more-link:hover {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .fc .fc-toolbar {
+        flex-direction: column;
+        gap: 12px;
+    }
+    
+    .fc .fc-toolbar-title {
+        font-size: 1.5rem !important;
+    }
+    
+    .fc .fc-button {
+        font-size: 0.85rem !important;
+        padding: 6px 12px !important;
+    }
+    
+    .calendar-legend {
+        gap: 12px;
+    }
+    
+    .legend-item {
+        padding: 6px 12px;
+        font-size: 0.85rem;
+    }
+}
+
+/* Animation */
 @keyframes fadeInUp {
     from {
         opacity: 0;
-        transform: translateY(6px);
+        transform: translateY(20px);
     }
     to {
         opacity: 1;
@@ -53,39 +295,110 @@
     }
 }
 
-/* Icon spacing */
-.islamic-icon {
-    margin-right: 5px;
+#calendar-wrapper {
+    animation: fadeInUp 0.5s ease;
+}
+
+/* Empty Calendar Message */
+.fc .fc-view-harness {
+    min-height: 500px;
+}
+
+/* Event Time Display */
+.fc-event-time {
+    font-weight: 700;
+    margin-right: 4px;
+}
+
+/* Grid Lines */
+.fc .fc-scrollgrid {
+    border: 1px solid var(--border-color);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.fc .fc-scrollgrid td,
+.fc .fc-scrollgrid th {
+    border-color: var(--border-color);
 }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-10">
-
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">
-                    <i class="fas fa-calendar-alt me-2"></i>
-                    Rohis Calendar
-                </h4>
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <div>
+                            <h2 class="fw-bold mb-2">
+                                <i class="fas fa-calendar-alt text-primary me-2"></i>
+                                Rohis Calendar
+                            </h2>
+                            <p class="text-muted mb-0">
+                                View all Rohis sessions and Islamic holidays throughout the year
+                            </p>
+                        </div>
+                        <a href="{% if current_user.role in ['admin', 'ketua', 'pembina'] %}{{ url_for('dashboard_admin') }}{% else %}{{ url_for('dashboard_member') }}{% endif %}" 
+                           class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                        </a>
+                    </div>
+                </div>
             </div>
 
-            <div class="card-body">
-                <p class="text-muted mb-3">
-                    📅 Calendar of Islamic Holidays and Rohis Meetings 🌙
-                </p>
-
-                <div class="mb-3 d-flex gap-2 flex-wrap">
-                    <span class="badge bg-primary">📘 Rohis Session</span>
-                    <span class="badge bg-primary">🌙 Islamic Holiday</span>
+            <!-- Legend -->
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <div class="legend-color rohis"></div>
+                    <span class="legend-text">📘 Rohis Sessions</span>
                 </div>
+                <div class="legend-item">
+                    <div class="legend-color islamic"></div>
+                    <span class="legend-text">🌙 Islamic Holidays</span>
+                </div>
+            </div>
 
+            <!-- Calendar -->
+            <div id="calendar-wrapper">
                 <div id="calendar"></div>
             </div>
-        </div>
 
+            <!-- Info Cards -->
+            <div class="row mt-4 g-3">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Calendar Tips
+                            </h6>
+                            <ul class="small text-muted mb-0">
+                                <li>Click on any event to view more details</li>
+                                <li>Use the view buttons to switch between Month, Week, and Day views</li>
+                                <li>Navigate between months using the arrow buttons</li>
+                                <li>Today's date is highlighted in green</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-bold text-success mb-3">
+                                <i class="fas fa-moon me-2"></i>About Islamic Dates
+                            </h6>
+                            <p class="small text-muted mb-0">
+                                Islamic holidays are displayed with their Hijri calendar dates. 
+                                Hover over any event to see the complete information including 
+                                the Hijri date conversion.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
@@ -101,13 +414,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
     const calendar = new FullCalendar.Calendar(calendarEl, {
         initialView: 'dayGridMonth',
-        height: 700,
+        height: 'auto',
+        aspectRatio: 1.8,
         nowIndicator: true,
-
+        navLinks: true,
+        selectable: true,
+        selectMirror: true,
+        dayMaxEvents: true,
+        weekNumbers: false,
+        
         headerToolbar: {
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
+        },
+        
+        buttonText: {
+            today: 'Today',
+            month: 'Month',
+            week: 'Week',
+            day: 'Day',
+            list: 'List'
         },
 
         events: '/api/dashboard_calendar',
@@ -122,23 +449,69 @@ document.addEventListener('DOMContentLoaded', function () {
             return [];
         },
 
-        eventContent: function (arg) {
-            const isHoliday = arg.event.extendedProps.type === 'islamic_holiday';
-            const el = document.createElement('div');
-
-            el.innerHTML = isHoliday
-                ? `<span class="islamic-icon">🌙</span>${arg.event.title}`
-                : arg.event.title;
-
-            return { domNodes: [el] };
+        eventDidMount: function(info) {
+            // Add tooltips with Hijri date information
+            if (info.event.extendedProps.hijri) {
+                info.el.title = info.event.title + '\n' + info.event.extendedProps.hijri;
+            }
+            
+            // Add subtle animation on mount
+            info.el.style.opacity = '0';
+            setTimeout(() => {
+                info.el.style.transition = 'opacity 0.3s ease';
+                info.el.style.opacity = '1';
+            }, 50);
         },
 
-        eventDidMount: function(info) {
-            if (info.event.extendedProps.hijri) {
-                info.el.title =
-                    info.event.title + "\n" +
-                    info.event.extendedProps.hijri;
+        eventClick: function(info) {
+            // Show detailed event information
+            const event = info.event;
+            const details = `
+                <strong>${event.title}</strong><br>
+                <small class="text-muted">
+                    ${event.start.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    })}
+                    ${event.extendedProps.hijri ? '<br>' + event.extendedProps.hijri : ''}
+                </small>
+            `;
+            
+            // You can customize this to open a modal instead
+            if (confirm('View more details about this event?\n\n' + event.title)) {
+                // Add navigation logic here if needed
+                console.log('Event details:', event);
             }
+        },
+
+        loading: function(isLoading) {
+            if (isLoading) {
+                document.getElementById('calendar-wrapper').style.opacity = '0.6';
+            } else {
+                document.getElementById('calendar-wrapper').style.opacity = '1';
+            }
+        },
+
+        // Custom day render for additional styling
+        dayCellDidMount: function(arg) {
+            const today = new Date();
+            const cellDate = arg.date;
+            
+            // Add weekend styling
+            if (arg.isToday) {
+                arg.el.classList.add('calendar-today');
+            }
+        },
+
+        // View change animation
+        viewDidMount: function() {
+            document.getElementById('calendar').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('calendar').style.transition = 'opacity 0.3s ease';
+                document.getElementById('calendar').style.opacity = '1';
+            }, 50);
         }
     });
 
