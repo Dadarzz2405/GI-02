@@ -450,4 +450,4 @@ For questions, issues, or suggestions:
 
 **⭐ If you find this project useful, please consider giving it a star!**
 
-Made with ❤️ for the Rohis community
+Made by Dadarzz, for a Passion Project
