@@ -21,7 +21,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!greeted) {
       addMessage(
         "bot",
-        "Assalamu’alaikum. I can help explain features or guide you to pages like attendance or dashboard."
+        "Assalamu'alaikum. I can help explain features or guide you to pages like attendance or dashboard."
       );
       greeted = true;
     }
@@ -75,19 +75,37 @@ document.addEventListener("DOMContentLoaded", () => {
         return res.json();
       })
       .then(data => {
-        if (data?.action === "navigate" && data.redirect) {
-          addMessage("bot", "Taking you there...");
-          setTimeout(() => {
-            window.location.href = data.redirect;
-          }, 700);
-        } else if (data?.action === "chat" && data.message) {
-          addMessage("bot", data.message);
-        } else {
-          addMessage("bot", "I’m not sure how to help with that.");
+        console.log("Received data:", data); // Debug log
+        
+        // Handle the response based on the actual structure from ai.py
+        if (data?.reply) {
+          const reply = data.reply;
+          
+          // Check if it's a navigation response
+          if (reply.action === "navigate" && reply.redirect) {
+            addMessage("bot", "Taking you there...");
+            setTimeout(() => {
+              window.location.href = reply.redirect;
+            }, 700);
+          } 
+          // Check if it's a chat response
+          else if (reply.action === "chat" && reply.message) {
+            addMessage("bot", reply.message);
+          } 
+          // Fallback for unexpected format
+          else {
+            console.warn("Unexpected reply format:", reply);
+            addMessage("bot", "I'm not sure how to help with that.");
+          }
+        } 
+        // Fallback if no reply object
+        else {
+          console.warn("No reply in response:", data);
+          addMessage("bot", "I'm not sure how to help with that.");
         }
       })
       .catch(err => {
-        console.error(err);
+        console.error("Chat error:", err);
         addMessage("bot", "Error contacting server.");
       })
       .finally(() => {
