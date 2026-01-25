@@ -47,12 +47,10 @@
                         <!-- Profile Picture -->
                         <div class="mb-3">
                             <img
-                                src="{{ url_for('static', filename='uploads/profiles/' ~ (u.profile_picture if u.profile_picture else 'default.png')) }}"
-                                data-fallback="{{ url_for('static', filename='uploads/profiles/default.png') }}"
+                                src="{{ url_for('serve_profile_picture', user_id=u.id) }}"
                                 alt="{{ u.name }}"
                                 class="rounded-circle shadow-sm"
                                 style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--bs-primary);"
-                                onerror="this.src = this.dataset.fallback;"
                             >
 
                         </div>

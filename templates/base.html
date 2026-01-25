@@ -106,7 +106,7 @@
                     
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <img src="{{ url_for('static', filename='uploads/profiles/' ~ (current_user.profile_picture or 'default.png')) }}" 
+                            <img src="{{ url_for('serve_profile_picture', user_id=current_user.id) }}" 
                                  alt="Profile" 
                                  class="rounded-circle me-2" 
                                  width="32" 
