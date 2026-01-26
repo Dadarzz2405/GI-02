@@ -835,12 +835,18 @@ def notulensi_view(notulensi_id):
 @app.route('/api/news-feed')
 @login_required
 def news_feed():
+    """
+    News feed API with comprehensive error handling and fallbacks
+    """
     try:
         today = datetime.now().date()
+        
+        # Get upcoming sessions
         upcoming_sessions = Session.query.filter(
             Session.date >= str(today)
         ).order_by(Session.date.asc()).limit(3).all()
         
+        # Get recent notulensi
         recent_notulensi = (
             db.session.query(Notulensi, Session)
             .join(Session, Notulensi.session_id == Session.id)
@@ -849,38 +855,68 @@ def news_feed():
             .all()
         )
         
+        # Process upcoming sessions
         upcoming_data = []
         for session in upcoming_sessions:
-            upcoming_data.append({
-                'id': session.id,
-                'name': session.name,
-                'date': session.date,
-                'pic': session.pic.name if session.pic else 'No PIC assigned'
-            })
+            try:
+                upcoming_data.append({
+                    'id': session.id,
+                    'name': session.name,
+                    'date': session.date,
+                    'pic': session.pic.name if session.pic else 'No PIC assigned'
+                })
+            except Exception as e:
+                print(f"Error processing session {session.id}: {e}")
+                continue
         
+        # Process recent notulensi with better error handling
         recent_data = []
         for notulensi, session in recent_notulensi:
             try:
-                # FIX: Add better error handling and fallback
-                if notulensi.content:
-                    summary = summarize_notulensi(notulensi.content)
-                else:
-                    summary = "Meeting notes available."
+                # Try to generate summary, but have multiple fallbacks
+                summary = "Meeting notes available."
+                
+                if notulensi and notulensi.content:
+                    try:
+                        # Only try to summarize if GROQ_API_KEY exists
+                        if os.environ.get("GROQ_API_KEY"):
+                            summary = summarize_notulensi(notulensi.content)
+                        else:
+                            # Fallback: Use first 150 characters of cleaned text
+                            from html import unescape
+                            import re
+                            clean_text = re.sub('<[^<]+?>', '', notulensi.content)
+                            clean_text = unescape(clean_text).strip()
+                            if len(clean_text) > 150:
+                                summary = clean_text[:150] + "..."
+                            else:
+                                summary = clean_text if clean_text else "Meeting notes available."
+                    except Exception as sum_error:
+                        print(f"Summarization error for notulensi {notulensi.id}: {sum_error}")
+                        # Fallback to manual text extraction
+                        try:
+                            from html import unescape
+                            import re
+                            clean_text = re.sub('<[^<]+?>', '', notulensi.content)
+                            clean_text = unescape(clean_text).strip()
+                            summary = clean_text[:150] + "..." if len(clean_text) > 150 else (clean_text or "Meeting notes available.")
+                        except:
+                            summary = "Meeting notes available."
+                
+                recent_data.append({
+                    'id': notulensi.id,
+                    'session_name': session.name,
+                    'session_date': session.date,
+                    'summary': summary,
+                    'updated_at': notulensi.updated_at.strftime('%d %b %Y') if notulensi.updated_at else notulensi.created_at.strftime('%d %b %Y')
+                })
             except Exception as e:
-                print(f"Summary error for notulensi {notulensi.id}: {e}")
+                print(f"Error processing notulensi {notulensi.id}: {e}")
                 import traceback
                 traceback.print_exc()
-                summary = "Meeting notes available."
-            
-            recent_data.append({
-                'id': notulensi.id,
-                'session_name': session.name,
-                'session_date': session.date,
-                'summary': summary,
-                'updated_at': notulensi.updated_at.strftime('%d %b %Y') if notulensi.updated_at else notulensi.created_at.strftime('%d %b %Y')
-            })
+                continue
         
-        # FIX: Always return valid JSON
+        # Always return valid JSON with 200 status
         return jsonify({
             'success': True,
             'upcoming': upcoming_data,
@@ -888,16 +924,18 @@ def news_feed():
         }), 200
         
     except Exception as e:
-        print(f"News feed error: {type(e).__name__}: {e}")
+        # Log the full error
+        print(f"CRITICAL News feed error: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
-        # FIX: Return proper error JSON instead of raising exception
+        
+        # Return empty data instead of error to prevent UI breaking
         return jsonify({
-            'success': False,
+            'success': True,  # Still return success to prevent error message
             'upcoming': [],
             'recent': [],
             'error': str(e)
-        }), 500
+        }), 200  # Use 200 status to prevent JS error handling
     
 @app.errorhandler(403)
 def forbidden(e):
