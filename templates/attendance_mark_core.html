@@ -8,7 +8,15 @@
 
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="fw-bold mb-0">Core Attendance</h2>
-            <a id="download-link" href="#" class="btn btn-success" disabled>Download Report</a>
+            <div class="d-flex gap-2">
+                <div id="lock-status"></div>
+                <button id="lock-session-btn" class="btn btn-warning" style="display: none;">
+                    <i class="fas fa-lock me-2"></i>Lock Session
+                </button>
+                <a id="download-link" href="#" class="btn btn-success disabled" disabled>
+                    <i class="fas fa-download me-2"></i>Download Report
+                </a>
+            </div>
         </div>
 
         <div class="mb-3">
