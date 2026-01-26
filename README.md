@@ -31,7 +31,6 @@ A comprehensive web-based application designed to digitize and streamline the ma
 - 📅 **Islamic Calendar Integration** - Automatic display of Islamic holidays with Hijri date conversion
 - 🤖 **AI-Powered Chatbot** - Islamic educational assistant using Groq API
 - 📈 **Analytics Dashboard** - Real-time statistics and attendance reports
-- 📱 **Responsive Design** - Mobile-friendly interface with modern UI/UX
 
 ### Advanced Features
 - **PIC (Person In Charge) Management** - Assign and manage event coordinators

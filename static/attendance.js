@@ -48,23 +48,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    sessionSelect.addEventListener("change", async () => {
-        const sessionId = sessionSelect.value;
-        if (sessionId) {
-            downloadLink.href = `/export/attendance/${sessionId}`;
-            downloadLink.removeAttribute("disabled");
-            
-            // Check if session is locked
-            await checkSessionLock(sessionId);
-        } else {
-            downloadLink.href = "#";
-            downloadLink.setAttribute("disabled", "true");
-            
-            if (lockStatus) {
-                lockStatus.innerHTML = '';
+    // FIX: Ensure sessionSelect exists before adding event listener
+    if (sessionSelect && downloadLink) {
+        sessionSelect.addEventListener("change", async () => {
+            const sessionId = sessionSelect.value;
+            if (sessionId) {
+                // FIX: Ensure sessionId is properly passed to the download URL
+                downloadLink.href = `/export/attendance/${sessionId}`;
+                downloadLink.removeAttribute("disabled");
+                downloadLink.classList.remove("disabled");
+                
+                // Check if session is locked
+                await checkSessionLock(sessionId);
+            } else {
+                downloadLink.href = "#";
+                downloadLink.setAttribute("disabled", "true");
+                downloadLink.classList.add("disabled");
+                
+                if (lockStatus) {
+                    lockStatus.innerHTML = '';
+                }
             }
-        }
-    });
+        });
+    }
 
     // Lock session button handler
     if (lockButton) {
@@ -115,7 +121,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const userId = btn.dataset.userId;
             const status = btn.dataset.status;
-            const sessionId = sessionSelect.value;
+            const sessionId = sessionSelect ? sessionSelect.value : null;
 
             if (!sessionId) {
                 alert("Select a session first.");
@@ -168,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     
     // Check initial lock status if session is pre-selected
-    if (sessionSelect.value) {
+    if (sessionSelect && sessionSelect.value) {
         checkSessionLock(sessionSelect.value);
     }
 });

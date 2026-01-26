@@ -861,9 +861,15 @@ def news_feed():
         recent_data = []
         for notulensi, session in recent_notulensi:
             try:
-                summary = summarize_notulensi(notulensi.content)
+                # FIX: Add better error handling and fallback
+                if notulensi.content:
+                    summary = summarize_notulensi(notulensi.content)
+                else:
+                    summary = "Meeting notes available."
             except Exception as e:
                 print(f"Summary error for notulensi {notulensi.id}: {e}")
+                import traceback
+                traceback.print_exc()
                 summary = "Meeting notes available."
             
             recent_data.append({
@@ -874,23 +880,25 @@ def news_feed():
                 'updated_at': notulensi.updated_at.strftime('%d %b %Y') if notulensi.updated_at else notulensi.created_at.strftime('%d %b %Y')
             })
         
+        # FIX: Always return valid JSON
         return jsonify({
             'success': True,
             'upcoming': upcoming_data,
             'recent': recent_data
-        })
+        }), 200
         
     except Exception as e:
         print(f"News feed error: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
+        # FIX: Return proper error JSON instead of raising exception
         return jsonify({
             'success': False,
             'upcoming': [],
             'recent': [],
             'error': str(e)
         }), 500
-
+    
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
