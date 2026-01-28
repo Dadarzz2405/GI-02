@@ -1,6 +1,7 @@
+#NEEDED LIBRARIES RAHHHHHH, kinda messy
 from utils import can_mark_attendance, is_core_user
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, abort, Response, Blueprint
-from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy 
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 import os
@@ -16,28 +17,27 @@ from io import TextIOWrapper, StringIO, BytesIO
 from docx import Document
 from formatter import format_attendance
 from summarizer import summarize_notulensi
-
+#config for the pfp
 UPLOAD_FOLDER = 'static/uploads/profiles'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'webp'}
-
+#init for all the librariessss
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 db.init_app(app)
 bcrypt = Bcrypt(app)
-
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 migrate = Migrate(app, db)
-
 attendance_bp = Blueprint("attendance", __name__)
 
+#manager ofc, t can see it
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
+#Login, no need comment actually
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -58,7 +58,7 @@ def login():
         
     return render_template('login.html')
 
-
+#home route ofc, need this, i'm an admin ofc
 @app.route('/')
 def home():
     if current_user.is_authenticated:
@@ -68,7 +68,7 @@ def home():
             return redirect(url_for('dashboard_member'))
     else:
         return redirect(url_for('login'))
-
+#Dashboards, admin on top
 @app.route('/dashboard_admin')
 @login_required
 def dashboard_admin():
@@ -82,7 +82,7 @@ def dashboard_member():
     if current_user.role in ['admin', 'ketua', 'pembina']:
         return redirect(url_for('dashboard_admin'))
     return render_template('dashboard_member.html')
-
+#profile bruhh, make it less boring
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -126,7 +126,7 @@ def create_session():
         return redirect(url_for('dashboard_admin'))
     pics = Pic.query.all()
     return render_template('create_session.html', pics=pics)
-
+#idk why the hell the import is here but just go on lah ya...
 from datetime import date
 @app.route('/api/attendance', methods=['POST'])
 @login_required
@@ -171,7 +171,7 @@ def api_attendance():
     db.session.commit()
 
     return jsonify({"success": True})
-
+#CORE FUNCTIONNNN!!!
 @app.route("/attendance/core")
 @login_required
 def attendance_core():
@@ -284,7 +284,7 @@ def manage_pics():
 
     pics = Pic.query.all()
     return render_template('manage_pic.html', pics=pics)
-
+#DOWNLOAD ATTENDANCE RAHHHHH
 @app.route("/export/attendance/<int:session_id>")
 @login_required
 def export_attendance_csv(session_id):
@@ -835,9 +835,6 @@ def notulensi_view(notulensi_id):
 @app.route('/api/news-feed')
 @login_required
 def news_feed():
-    """
-    News feed API with comprehensive error handling and fallbacks
-    """
     try:
         today = datetime.now().date()
         
@@ -882,7 +879,7 @@ def news_feed():
                         if os.environ.get("GROQ_API_KEY"):
                             summary = summarize_notulensi(notulensi.content)
                         else:
-                            # Fallback: Use first 150 characters of cleaned text
+                            #Fallback besik
                             from html import unescape
                             import re
                             clean_text = re.sub('<[^<]+?>', '', notulensi.content)
@@ -893,7 +890,7 @@ def news_feed():
                                 summary = clean_text if clean_text else "Meeting notes available."
                     except Exception as sum_error:
                         print(f"Summarization error for notulensi {notulensi.id}: {sum_error}")
-                        # Fallback to manual text extraction
+                        # Fallback brok
                         try:
                             from html import unescape
                             import re
@@ -916,7 +913,6 @@ def news_feed():
                 traceback.print_exc()
                 continue
         
-        # Always return valid JSON with 200 status
         return jsonify({
             'success': True,
             'upcoming': upcoming_data,
@@ -924,23 +920,21 @@ def news_feed():
         }), 200
         
     except Exception as e:
-        # Log the full error
         print(f"CRITICAL News feed error: {type(e).__name__}: {e}")
         import traceback
         traceback.print_exc()
         
-        # Return empty data instead of error to prevent UI breaking
         return jsonify({
-            'success': True,  # Still return success to prevent error message
+            'success': True, 
             'upcoming': [],
             'recent': [],
             'error': str(e)
-        }), 200  # Use 200 status to prevent JS error handling
+        }), 200  
     
 @app.errorhandler(403)
 def forbidden(e):
     return render_template('403.html'), 403
-
+#Start the entire hundreds line of code program taht i made 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)

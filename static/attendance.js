@@ -4,7 +4,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const lockButton = document.getElementById("lock-session-btn");
     const lockStatus = document.getElementById("lock-status");
 
-    // Debug logging
     console.log("Attendance.js loaded");
     console.log("Session select:", sessionSelect);
     console.log("Download link:", downloadLink);
@@ -15,7 +14,6 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
             
             if (data.is_locked) {
-                // Disable all attendance buttons
                 document.querySelectorAll(".att-btn").forEach(btn => {
                     btn.disabled = true;
                     btn.classList.add('disabled');
@@ -30,7 +28,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     lockButton.innerHTML = '<i class="fas fa-lock me-2"></i>Locked';
                 }
             } else {
-                // Enable all attendance buttons
                 document.querySelectorAll(".att-btn").forEach(btn => {
                     btn.disabled = false;
                     btn.classList.remove('disabled');
@@ -54,14 +51,12 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // FIX: Main event listener for session selection
     if (sessionSelect) {
         sessionSelect.addEventListener("change", async () => {
             const sessionId = sessionSelect.value;
             console.log("Session changed to:", sessionId);
             
             if (sessionId && downloadLink) {
-                // FIX: Properly enable the download link
                 const downloadUrl = `/export/attendance/${sessionId}`;
                 console.log("Setting download URL to:", downloadUrl);
                 
@@ -69,13 +64,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 downloadLink.removeAttribute("disabled");
                 downloadLink.classList.remove("disabled");
                 
-                // Make sure it's clickable
                 downloadLink.style.pointerEvents = "auto";
                 downloadLink.style.opacity = "1";
                 
                 console.log("Download link enabled");
                 
-                // Check if session is locked
                 await checkSessionLock(sessionId);
             } else if (downloadLink) {
                 downloadLink.href = "#";
@@ -159,7 +152,6 @@ document.addEventListener("DOMContentLoaded", () => {
             btn.disabled = true;
 
             try {
-                // Determine which endpoint to use based on page context
                 const endpoint = document.querySelector('[data-attendance-type="core"]') 
                     ? "/api/attendance/core" 
                     : "/api/attendance";
@@ -183,7 +175,6 @@ document.addEventListener("DOMContentLoaded", () => {
                     return;
                 }
 
-                // Handle known backend errors
                 if (data.error === "already_marked") {
                     lockRow(userId, status);
                     return;
@@ -207,11 +198,9 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
     
-    // Check initial lock status if session is pre-selected
     if (sessionSelect && sessionSelect.value) {
         checkSessionLock(sessionSelect.value);
         
-        // Also enable download if session is selected
         if (downloadLink) {
             const downloadUrl = `/export/attendance/${sessionSelect.value}`;
             downloadLink.href = downloadUrl;
